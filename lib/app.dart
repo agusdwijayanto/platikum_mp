@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
 //Tambah import:
@@ -22,7 +23,10 @@ class MyApp extends StatelessWidget {
       title: 'Praktikum Mobile Programming',
       debugShowCheckedModeBanner: false,
       routes: {
-        '/': (_) => const LoginPage(),
+        // Khusus web (Chrome): login SQLite (sqflite) tidak bisa jalan di web,
+        // jadi aplikasi langsung masuk Dashboard untuk keperluan tes P8 dan P9.
+        // Di HP dan desktop alur tetap normal lewat LoginPage.
+        '/': (_) => kIsWeb ? const Dashboard() : const LoginPage(),
         '/dashboard': (_) => const Dashboard(),
         //Tambah route
         '/p0': (_) => const P0Page(),
