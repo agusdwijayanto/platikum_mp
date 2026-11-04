@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'login_page.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ProfilPage extends StatelessWidget {
   final Map<String, dynamic>? user;
@@ -45,11 +45,16 @@ class ProfilPage extends StatelessWidget {
               style: TextStyle(fontSize: 16)),
           const SizedBox(height: 24),
           ElevatedButton.icon(
-            onPressed: () {
-              Navigator.pushReplacement(
+            onPressed: () async {
+              // Logout yang sama dengan di seluruh aplikasi: sesi
+              // Supabase diakhiri, lalu kembali ke gerbang login dan
+              // tumpukan halaman dibersihkan.
+              await Supabase.instance.client.auth.signOut();
+              if (!context.mounted) return;
+              Navigator.pushNamedAndRemoveUntil(
                 context,
-                MaterialPageRoute(
-                    builder: (_) => const LoginPage()),
+                '/',
+                (route) => false,
               );
             },
             icon: const Icon(Icons.logout),

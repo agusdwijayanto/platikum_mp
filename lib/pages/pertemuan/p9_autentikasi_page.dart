@@ -144,10 +144,16 @@ class _P9AutentikasiPageState extends State<P9AutentikasiPage> {
     }
   }
 
-  // Logout: sesi dihapus dari server dan dari penyimpanan lokal,
-  // listener auth mengembalikan tampilan ke form login.
+  // Logout: sesi dihapus dari server dan dari penyimpanan lokal.
+  // Di mode gerbang, listener auth mengembalikan tampilan ke form
+  // login di halaman ini juga. Dari halaman Materi, pengguna dibawa
+  // pulang ke gerbang (keluar dari aplikasi) dan tumpukan halaman
+  // dibersihkan, supaya tombol kembali tidak bisa masuk lagi ke
+  // Dashboard dalam keadaan sudah logout.
   Future<void> logout() async {
     await _supabase.auth.signOut();
+    if (!mounted || widget.sebagaiGerbang) return;
+    Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
   }
 
   // Mengambil tugas milik pengguna yang sedang login.
@@ -279,7 +285,11 @@ class _P9AutentikasiPageState extends State<P9AutentikasiPage> {
     }
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Pertemuan 9 - Autentikasi'),
+        title: Text(
+          widget.sebagaiGerbang
+              ? 'Praktikum Mobile Programming'
+              : 'Pertemuan 9 - Autentikasi',
+        ),
         backgroundColor: Colors.blueAccent,
       ),
       body: _pengguna == null ? _formLogin() : _tampilanTugas(),
