@@ -24,6 +24,7 @@ class _RegisterPageState extends State<RegisterPage> {
   bool olahraga = false;
   bool musik = false;
   bool _memproses = false;
+  bool _sembunyikanPassword = true;
 
   @override
   void dispose() {
@@ -189,10 +190,22 @@ class _RegisterPageState extends State<RegisterPage> {
             const SizedBox(height: 16),
             TextFormField(
               controller: passController,
-              obscureText: true,
-              decoration: const InputDecoration(
+              obscureText: _sembunyikanPassword,
+              decoration: InputDecoration(
                 labelText: 'Password',
-                border: OutlineInputBorder(),
+                border: const OutlineInputBorder(),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _sembunyikanPassword
+                        ? Icons.visibility_off
+                        : Icons.visibility,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _sembunyikanPassword = !_sembunyikanPassword;
+                    });
+                  },
+                ),
               ),
               validator: (v) =>
                   (v == null || v.isEmpty) ? 'Password wajib diisi' : null,
@@ -203,6 +216,8 @@ class _RegisterPageState extends State<RegisterPage> {
               child: ElevatedButton(
                 onPressed: _memproses ? null : _register,
                 style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
                 child: const Text('DAFTAR'),

@@ -26,6 +26,7 @@ class _P9AutentikasiPageState extends State<P9AutentikasiPage> {
 
   StreamSubscription<AuthState>? _langgananAuth;
   bool _memprosesLogin = false;
+  bool _sembunyikanPassword = true;
   bool _sudahPindah = false;
 
   User? get _pengguna => _supabase.auth.currentUser;
@@ -116,7 +117,7 @@ class _P9AutentikasiPageState extends State<P9AutentikasiPage> {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        const Icon(Icons.lock, size: 64, color: Colors.blueAccent),
+        const Icon(Icons.account_circle, size: 64, color: Colors.blueAccent),
         const SizedBox(height: 16),
         TextField(
           controller: _emailController,
@@ -129,10 +130,22 @@ class _P9AutentikasiPageState extends State<P9AutentikasiPage> {
         const SizedBox(height: 16),
         TextField(
           controller: _passwordController,
-          obscureText: true,
-          decoration: const InputDecoration(
+          obscureText: _sembunyikanPassword,
+          decoration: InputDecoration(
             labelText: 'Password',
-            border: OutlineInputBorder(),
+            border: const OutlineInputBorder(),
+            suffixIcon: IconButton(
+              icon: Icon(
+                _sembunyikanPassword
+                    ? Icons.visibility_off
+                    : Icons.visibility,
+              ),
+              onPressed: () {
+                setState(() {
+                  _sembunyikanPassword = !_sembunyikanPassword;
+                });
+              },
+            ),
           ),
         ),
         const SizedBox(height: 24),

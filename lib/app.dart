@@ -22,14 +22,14 @@ class MyApp extends StatelessWidget {
       title: 'Praktikum Mobile Programming',
       debugShowCheckedModeBanner: false,
       // Tema minimal terang untuk seluruh aplikasi: latar terang,
-      // AppBar putih tanpa bayangan, kartu bersudut bulat.
+      // AppBar biru primary, kartu bersudut bulat.
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         scaffoldBackgroundColor: const Color(0xFFF7F8FA),
         appBarTheme: const AppBarTheme(
-          backgroundColor: Colors.white,
-          foregroundColor: Colors.black87,
+          backgroundColor: Colors.blue,
+          foregroundColor: Colors.white,
           elevation: 0,
         ),
         cardTheme: CardThemeData(
