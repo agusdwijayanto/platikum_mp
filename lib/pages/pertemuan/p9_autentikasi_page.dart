@@ -15,7 +15,12 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 //    pengguna tetap login tanpa mengisi form lagi.
 // 4. Tombol Logout menghapus sesi dan kembali ke form login.
 class P9AutentikasiPage extends StatefulWidget {
-  const P9AutentikasiPage({super.key});
+  // Mode gerbang: halaman ini dipakai sebagai pintu depan aplikasi.
+  // Begitu ada sesi login yang aktif, pengguna diteruskan ke
+  // Dashboard dan tidak tinggal di daftar tugas halaman ini.
+  final bool sebagaiGerbang;
+
+  const P9AutentikasiPage({super.key, this.sebagaiGerbang = false});
 
   @override
   State<P9AutentikasiPage> createState() => _P9AutentikasiPageState();
@@ -32,8 +37,23 @@ class _P9AutentikasiPageState extends State<P9AutentikasiPage> {
   List<dynamic> _daftarTugas = [];
   bool _memuatTugas = false;
   bool _memprosesLogin = false;
+  bool _sudahPindah = false;
 
   User? get _pengguna => _supabase.auth.currentUser;
+
+  // Dalam mode gerbang, pengguna yang sesinya aktif langsung
+  // diteruskan ke Dashboard. Penanda _sudahPindah menjaga
+  // navigasi hanya terjadi satu kali.
+  void _teruskanKeDashboard() {
+    if (!widget.sebagaiGerbang || _sudahPindah || _pengguna == null) {
+      return;
+    }
+    _sudahPindah = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      Navigator.pushReplacementNamed(context, '/dashboard');
+    });
+  }
 
   @override
   void initState() {
@@ -44,11 +64,13 @@ class _P9AutentikasiPageState extends State<P9AutentikasiPage> {
     _langgananAuth = _supabase.auth.onAuthStateChange.listen((data) {
       if (!mounted) return;
       setState(() {});
-      if (_pengguna != null) {
+      _teruskanKeDashboard();
+      if (_pengguna != null && !widget.sebagaiGerbang) {
         ambilTugas();
       }
     });
-    if (_pengguna != null) {
+    _teruskanKeDashboard();
+    if (_pengguna != null && !widget.sebagaiGerbang) {
       ambilTugas();
     }
   }
@@ -248,6 +270,13 @@ class _P9AutentikasiPageState extends State<P9AutentikasiPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Mode gerbang: sesi sudah ada dan penerusan ke Dashboard
+    // sedang disiapkan, tampilkan indikator muat sebentar.
+    if (widget.sebagaiGerbang && _pengguna != null) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
     return Scaffold(
       appBar: AppBar(
         title: const Text('Pertemuan 9 - Autentikasi'),

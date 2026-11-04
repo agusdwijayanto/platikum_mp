@@ -1,9 +1,7 @@
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
 //Tambah import:
 import 'pages/dashboard.dart';
-import 'pages/login_page.dart';
 import 'pages/pertemuan/p0_page.dart';
 import 'pages/pertemuan/p1_page.dart';
 import 'pages/pertemuan/p2_page.dart';
@@ -23,10 +21,11 @@ class MyApp extends StatelessWidget {
       title: 'Praktikum Mobile Programming',
       debugShowCheckedModeBanner: false,
       routes: {
-        // Khusus web (Chrome): login SQLite (sqflite) tidak bisa jalan di web,
-        // jadi aplikasi langsung masuk Dashboard untuk keperluan tes P8 dan P9.
-        // Di HP dan desktop alur tetap normal lewat LoginPage.
-        '/': (_) => kIsWeb ? const Dashboard() : const LoginPage(),
+        // Pintu depan aplikasi: login email Supabase (halaman Pertemuan 9
+        // dalam mode gerbang). Sesudah login pengguna diteruskan ke
+        // Dashboard, dan sesi yang masih aktif membuat aplikasi
+        // langsung masuk Dashboard pada pembukaan berikutnya.
+        '/': (_) => const P9AutentikasiPage(sebagaiGerbang: true),
         '/dashboard': (_) => const Dashboard(),
         //Tambah route
         '/p0': (_) => const P0Page(),
