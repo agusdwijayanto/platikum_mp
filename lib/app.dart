@@ -10,6 +10,8 @@ import 'pages/pertemuan/p3_listview.dart';
 import 'pages/pertemuan/p4_toastalert.dart';
 import 'pages/pertemuan/p5_gesturedetector.dart';
 import 'pages/pertemuan/p6_form_page.dart';
+import 'pages/pertemuan/p8_todo_page.dart';
+import 'pages/pertemuan/p9_autentikasi_page.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -30,6 +32,8 @@ class MyApp extends StatelessWidget {
         '/p4': (_) => const P4ToastAlert(),
         '/p5': (_) => const P5Gesturedetector(),
         '/p6': (_) => const P6_FormPage(),
+        '/p8': (_) => const P8TodoPage(),
+        '/p9': (_) => const P9AutentikasiPage(),
       },
     );
   }

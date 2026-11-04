@@ -50,6 +50,20 @@ class MateriPage extends StatelessWidget {
           subtitle: 'Latihan Form',
           route: '/p6',
         ),
+        _materiCard(
+          context,
+          icon: Icons.api,
+          title: 'Pertemuan 8',
+          subtitle: 'Penggunaan API - To-Do List Supabase',
+          route: '/p8',
+        ),
+        _materiCard(
+          context,
+          icon: Icons.lock,
+          title: 'Pertemuan 9',
+          subtitle: 'Autentikasi dan Manajemen Sesi',
+          route: '/p9',
+        ),
       ],
     );
   }
