@@ -8,7 +8,6 @@ class P1Page extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Pertemuan 1'),
-        backgroundColor: Colors.blueAccent,
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),

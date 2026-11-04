@@ -213,7 +213,6 @@ class _P8TodoPageState extends State<P8TodoPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Pertemuan 8 - To-Do List API'),
-        backgroundColor: Colors.blueAccent,
       ),
       body: _isiBody(),
       floatingActionButton: FloatingActionButton(

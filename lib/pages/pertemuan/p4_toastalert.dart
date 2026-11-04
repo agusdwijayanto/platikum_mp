@@ -53,7 +53,6 @@ class P4ToastAlert extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Pertemuan 4 - Menu Makanan'),
-        backgroundColor: Colors.blueAccent,
       ),
       // Column sebagai layout utama — sesuai tugas
       body: Column(

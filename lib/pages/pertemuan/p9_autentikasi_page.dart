@@ -92,33 +92,6 @@ class _P9AutentikasiPageState extends State<P9AutentikasiPage> {
     }
   }
 
-  Future<void> daftar() async {
-    final email = _emailController.text.trim();
-    final password = _passwordController.text;
-    if (email.isEmpty || password.isEmpty) {
-      _tampilPesan('Email dan password wajib diisi');
-      return;
-    }
-    setState(() => _memprosesLogin = true);
-    try {
-      final response = await _supabase.auth.signUp(
-        email: email,
-        password: password,
-      );
-      // Session kosong berarti server menunggu konfirmasi email.
-      if (response.session == null) {
-        _tampilPesan(
-          'Pendaftaran berhasil. Cek email untuk konfirmasi, lalu login.',
-        );
-      }
-    } on AuthException catch (e) {
-      _tampilPesan('Daftar gagal: ${e.message}');
-    } catch (e) {
-      _tampilPesan('Tidak bisa terhubung ke server: $e');
-    } finally {
-      if (mounted) setState(() => _memprosesLogin = false);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -134,7 +107,6 @@ class _P9AutentikasiPageState extends State<P9AutentikasiPage> {
               ? 'Praktikum Mobile Programming'
               : 'Pertemuan 9 - Autentikasi',
         ),
-        backgroundColor: Colors.blueAccent,
       ),
       body: _pengguna == null ? _formLogin() : _infoAkun(),
     );
@@ -181,7 +153,7 @@ class _P9AutentikasiPageState extends State<P9AutentikasiPage> {
         ),
         const SizedBox(height: 8),
         OutlinedButton(
-          onPressed: _memprosesLogin ? null : daftar,
+          onPressed: () => Navigator.pushNamed(context, '/register'),
           style: OutlinedButton.styleFrom(
             padding: const EdgeInsets.symmetric(vertical: 14),
           ),

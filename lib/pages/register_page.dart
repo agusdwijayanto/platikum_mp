@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:sqflite/sqflite.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../db/database_helper.dart';
-
+// Registrasi akun Supabase. Email dan password menjadi kredensial
+// login; data lainnya disimpan sebagai metadata akun dan dibaca
+// oleh halaman Profil.
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
 
@@ -22,6 +23,7 @@ class _RegisterPageState extends State<RegisterPage> {
   bool membaca = false;
   bool olahraga = false;
   bool musik = false;
+  bool _memproses = false;
 
   @override
   void dispose() {
@@ -41,37 +43,50 @@ class _RegisterPageState extends State<RegisterPage> {
     if (olahraga) hobi.add('Olahraga');
     if (musik) hobi.add('Musik');
 
+    setState(() => _memproses = true);
     try {
-      await DatabaseHelper.instance.register({
-        'nim': nimController.text.trim(),
-        'nama': namaController.text.trim(),
-        'email': emailController.text.trim(),
-        'no_hp': hpController.text.trim(),
-        'jenis_kelamin': jenisKelamin,
-        'hobi': hobi.join(', '),
-        'password': passController.text,
-      });
+      final response = await Supabase.instance.client.auth.signUp(
+        email: emailController.text.trim(),
+        password: passController.text,
+        data: {
+          'nim': nimController.text.trim(),
+          'nama': namaController.text.trim(),
+          'no_hp': hpController.text.trim(),
+          if (jenisKelamin != null) 'jenis_kelamin': jenisKelamin,
+          'hobi': hobi.join(', '),
+        },
+      );
       if (!mounted) return;
+      // Session kosong berarti server menunggu konfirmasi email.
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('Registrasi berhasil, silakan login')),
+        SnackBar(
+          content: Text(
+            response.session == null
+                ? 'Registrasi berhasil. Cek email untuk konfirmasi, lalu login.'
+                : 'Registrasi berhasil',
+          ),
+        ),
       );
       Navigator.pop(context);
-    } on DatabaseException {
+    } on AuthException catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('NIM sudah terdaftar')),
+        SnackBar(content: Text('Registrasi gagal: ${e.message}')),
       );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Tidak bisa terhubung ke server: $e')),
+      );
+    } finally {
+      if (mounted) setState(() => _memproses = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Registrasi'),
-        backgroundColor: Colors.blueAccent,
-      ),
+      appBar: AppBar(title: const Text('Registrasi')),
       body: Form(
         key: _formKey,
         child: ListView(
@@ -186,10 +201,8 @@ class _RegisterPageState extends State<RegisterPage> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: _register,
+                onPressed: _memproses ? null : _register,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
                 child: const Text('DAFTAR'),

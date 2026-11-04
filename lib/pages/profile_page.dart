@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
-
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+// Profil membaca akun Supabase yang sedang login: email dari sesi,
+// data lainnya dari metadata yang diisi saat registrasi.
 class ProfilPage extends StatelessWidget {
-  final Map<String, dynamic>? user;
-
-  const ProfilPage({super.key, this.user});
+  const ProfilPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final nama = user?['nama'] ?? 'Agus Dwijayanto';
-    final nim = user?['nim'] ?? '241011750001';
-    final email = user?['email'] ?? '-';
-    final noHp = user?['no_hp'] ?? '-';
-    final jenisKelamin = user?['jenis_kelamin'] ?? '-';
-    final hobi = user?['hobi'] ?? '-';
+    final akun = Supabase.instance.client.auth.currentUser;
+    final meta = akun?.userMetadata ?? const <String, dynamic>{};
+
+    String isi(String kunci) {
+      final nilai = meta[kunci]?.toString() ?? '';
+      return nilai.isEmpty ? '-' : nilai;
+    }
 
     return Center(
       child: Column(
@@ -28,18 +28,20 @@ class ProfilPage extends StatelessWidget {
             style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
-          Text('Nama: $nama', style: const TextStyle(fontSize: 16)),
+          Text('Nama: ${isi('nama')}', style: const TextStyle(fontSize: 16)),
           const SizedBox(height: 4),
-          Text('NIM: $nim', style: const TextStyle(fontSize: 16)),
+          Text('NIM: ${isi('nim')}', style: const TextStyle(fontSize: 16)),
           const SizedBox(height: 4),
-          Text('Email: $email', style: const TextStyle(fontSize: 16)),
-          const SizedBox(height: 4),
-          Text('No. HP: $noHp', style: const TextStyle(fontSize: 16)),
-          const SizedBox(height: 4),
-          Text('Jenis Kelamin: $jenisKelamin',
+          Text('Email: ${akun?.email ?? '-'}',
               style: const TextStyle(fontSize: 16)),
           const SizedBox(height: 4),
-          Text('Hobi: $hobi', style: const TextStyle(fontSize: 16)),
+          Text('No. HP: ${isi('no_hp')}',
+              style: const TextStyle(fontSize: 16)),
+          const SizedBox(height: 4),
+          Text('Jenis Kelamin: ${isi('jenis_kelamin')}',
+              style: const TextStyle(fontSize: 16)),
+          const SizedBox(height: 4),
+          Text('Hobi: ${isi('hobi')}', style: const TextStyle(fontSize: 16)),
           const SizedBox(height: 4),
           const Text('Kelas: 04SIFE002',
               style: TextStyle(fontSize: 16)),

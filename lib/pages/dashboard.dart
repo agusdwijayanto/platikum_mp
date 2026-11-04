@@ -19,7 +19,7 @@ class _DashboardState extends State<Dashboard> {
   late final List<Widget> _pages = [
     const HomePage(),
     const MateriPage(),
-    ProfilPage(user: widget.user),
+    const ProfilPage(),
   ];
 
   static const List<String> _titles = ['Home', 'Materi', 'Profil'];
@@ -28,7 +28,6 @@ class _DashboardState extends State<Dashboard> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.blueAccent,
         title: Text(_titles[_selectedIndex]),
       ),
       body: _pages[_selectedIndex],
