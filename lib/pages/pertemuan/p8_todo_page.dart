@@ -4,10 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-// Konfigurasi Supabase.
-// Ambil dari dashboard Supabase: Settings lalu API.
-// Dua nilai ini dipakai di setiap request sebagai identitas aplikasi,
-// supaya server Supabase mengenali siapa yang meminta data.
+// URL dan kunci publishable project Supabase (flutterlab).
 const String supabaseUrl = 'https://abateiobysegtdgklnwi.supabase.co';
 const String supabaseAnonKey = 'sb_publishable_cuTjsQsW3gihnDZJOD_FzA_nN253Ezc';
 
@@ -25,19 +22,13 @@ class _P8TodoPageState extends State<P8TodoPage> {
 
   final _judulController = TextEditingController();
 
-  // Sesi login dibaca dari supabase_flutter, hanya untuk mengambil
-  // token dan id pengguna yang sedang login (Pertemuan 9). Seluruh
-  // lalu lintas data halaman ini tetap memakai http mentah sesuai
-  // materi Pertemuan 8, bukan SDK.
   Session? get _sesi => Supabase.instance.client.auth.currentSession;
   User? get _pengguna => Supabase.instance.client.auth.currentUser;
 
-  // Header yang dikirim di semua request:
-  // - apikey: kunci publik project Supabase, tanda pengenal aplikasi.
-  // - Authorization: Bearer + token sesi pengguna yang sedang login.
-  //   Token inilah yang dibaca aturan RLS di server, sehingga data
-  //   yang kembali hanya tugas milik pengguna tersebut.
-  // - Content-Type: memberi tahu server bahwa isi request berformat JSON.
+  // Data tetap diambil dengan http mentah; SDK hanya dipinjam
+  // sesinya. Authorization memakai token sesi, bukan kunci
+  // publishable, supaya RLS hanya mengembalikan tugas milik
+  // pengguna yang sedang login.
   Map<String, String> _header() {
     return {
       'apikey': supabaseAnonKey,
@@ -66,9 +57,6 @@ class _P8TodoPageState extends State<P8TodoPage> {
     ).showSnackBar(SnackBar(content: Text(pesan)));
   }
 
-  // GET: mengambil daftar tugas dari server.
-  // Respons berhasil = status 200, isi body berupa JSON daftar tugas.
-  // Respons gagal = status selain 200, pesan error ditampilkan ke pengguna.
   Future<void> ambilTugas() async {
     if (_pengguna == null) {
       setState(() {
@@ -108,8 +96,6 @@ class _P8TodoPageState extends State<P8TodoPage> {
     }
   }
 
-  // POST: mengirim tugas baru untuk disimpan di server.
-  // Respons berhasil = status 201 (data baru berhasil dibuat).
   Future<void> tambahTugas() async {
     final judul = _judulController.text.trim();
     if (judul.isEmpty || _pengguna == null) return;
@@ -136,9 +122,6 @@ class _P8TodoPageState extends State<P8TodoPage> {
     }
   }
 
-  // PATCH: mengubah sebagian data tugas yang sudah ada.
-  // Di sini hanya kolom selesai yang dikirim, judul tidak ikut diubah.
-  // Tugas yang diubah ditunjuk lewat id pada alamat (?id=eq.<id>).
   Future<void> ubahStatusTugas(
     Map<String, dynamic> tugas,
     bool selesai,
@@ -163,7 +146,6 @@ class _P8TodoPageState extends State<P8TodoPage> {
     }
   }
 
-  // DELETE: menghapus tugas dari server berdasarkan id-nya.
   Future<void> hapusTugas(Map<String, dynamic> tugas) async {
     final yakin = await showDialog<bool>(
       context: context,
@@ -273,20 +255,23 @@ class _P8TodoPageState extends State<P8TodoPage> {
         itemBuilder: (context, index) {
           final tugas = _daftarTugas[index] as Map<String, dynamic>;
           final selesai = tugas['selesai'] == true;
-          return ListTile(
-            leading: Checkbox(
-              value: selesai,
-              onChanged: (value) => ubahStatusTugas(tugas, value ?? false),
-            ),
-            title: Text(
-              tugas['judul'] ?? '',
-              style: TextStyle(
-                decoration: selesai ? TextDecoration.lineThrough : null,
+          return Card(
+            margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            child: ListTile(
+              leading: Checkbox(
+                value: selesai,
+                onChanged: (value) => ubahStatusTugas(tugas, value ?? false),
               ),
-            ),
-            trailing: IconButton(
-              icon: const Icon(Icons.delete, color: Colors.red),
-              onPressed: () => hapusTugas(tugas),
+              title: Text(
+                tugas['judul'] ?? '',
+                style: TextStyle(
+                  decoration: selesai ? TextDecoration.lineThrough : null,
+                ),
+              ),
+              trailing: IconButton(
+                icon: const Icon(Icons.delete, color: Colors.red),
+                onPressed: () => hapusTugas(tugas),
+              ),
             ),
           );
         },

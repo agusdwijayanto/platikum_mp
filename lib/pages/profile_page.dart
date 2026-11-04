@@ -46,9 +46,7 @@ class ProfilPage extends StatelessWidget {
           const SizedBox(height: 24),
           ElevatedButton.icon(
             onPressed: () async {
-              // Logout yang sama dengan di seluruh aplikasi: sesi
-              // Supabase diakhiri, lalu kembali ke gerbang login dan
-              // tumpukan halaman dibersihkan.
+              // Akhiri sesi, kembali ke gerbang, bersihkan tumpukan halaman.
               await Supabase.instance.client.auth.signOut();
               if (!context.mounted) return;
               Navigator.pushNamedAndRemoveUntil(
