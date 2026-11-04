@@ -22,7 +22,7 @@ Untuk pengujian login dan manajemen sesi di halaman Pertemuan 9:
 
 | Akun | Email | Password |
 | --- | --- | --- |
-| Akun 1 | akun1@flutterlab.test | Flutterlab#1 |
-| Akun 2 | akun2@flutterlab.test | Flutterlab#2 |
+| Akun 1 | 241011750001@gmail.com | 241011750001 |
+| Akun 2 | 241011750002@gmail.com | 241011750002 |
 
 Kedua akun terdaftar di Supabase Auth pada project flutterlab. Masing-masing akun hanya dapat melihat daftar tugas (tabel tugas) miliknya sendiri.
