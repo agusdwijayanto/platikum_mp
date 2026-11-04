@@ -15,3 +15,14 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
+
+## Akun Tes Pertemuan 9 (Autentikasi Supabase)
+
+Untuk pengujian login dan manajemen sesi di halaman Pertemuan 9:
+
+| Akun | Email | Password |
+| --- | --- | --- |
+| Akun 1 | akun1@flutterlab.test | Flutterlab#1 |
+| Akun 2 | akun2@flutterlab.test | Flutterlab#2 |
+
+Kedua akun terdaftar di Supabase Auth pada project flutterlab. Masing-masing akun hanya dapat melihat daftar tugas (tabel tugas) miliknya sendiri.
