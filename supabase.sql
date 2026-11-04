@@ -1,9 +1,10 @@
--- Pertemuan 9: tabel tugas per pengguna untuk fitur autentikasi.
--- Jalankan di SQL Editor dashboard Supabase (project todo).
--- Tabel ini terpisah dari tabel todos milik Pertemuan 8, supaya
--- halaman Pertemuan 8 yang memakai anon key tidak ikut rusak.
+-- Skema akhir database Supabase (project flutterlab).
+-- Satu tabel To-Do List untuk Pertemuan 8 dan Pertemuan 9: daftar
+-- yang sama, dibagi per akun lewat kolom user_id dan Row Level
+-- Security. Pertemuan 8 mengaksesnya lewat http mentah, Pertemuan 9
+-- lewat SDK, keduanya membaca baris milik akun yang sedang login.
 
-create table tugas (
+create table todos (
   id bigint generated always as identity primary key,
   user_id uuid not null references auth.users (id) on delete cascade,
   judul text,
@@ -13,13 +14,13 @@ create table tugas (
 
 -- Nyalakan Row Level Security. Tanpa policy di bawah, tidak ada
 -- yang bisa mengakses tabel ini lewat API.
-alter table tugas enable row level security;
+alter table todos enable row level security;
 
 -- Satu policy untuk semua operasi (lihat, tambah, ubah, hapus):
 -- pengguna yang sudah login hanya bisa mengakses baris yang
 -- user_id-nya sama dengan id akunnya sendiri.
-create policy "Pengguna mengelola tugas miliknya sendiri"
-  on tugas
+create policy "Pengguna mengelola todo miliknya sendiri"
+  on todos
   for all
   to authenticated
   using (auth.uid() = user_id)

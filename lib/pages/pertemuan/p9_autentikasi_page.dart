@@ -8,7 +8,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 // Alurnya:
 // 1. Pengguna login dengan email dan password (Supabase Auth).
 // 2. Sesudah login, email pengguna ditampilkan di bagian atas dan
-//    daftar tugasnya dimuat. Aturan RLS di tabel tugas memastikan
+//    daftar tugasnya dimuat. Aturan RLS di tabel todos memastikan
 //    tiap akun hanya melihat tugas miliknya sendiri.
 // 3. Sesi disimpan otomatis oleh supabase_flutter di penyimpanan
 //    lokal, jadi sesudah aplikasi ditutup lalu dibuka lagi
@@ -156,7 +156,7 @@ class _P9AutentikasiPageState extends State<P9AutentikasiPage> {
   Future<void> ambilTugas() async {
     setState(() => _memuatTugas = true);
     try {
-      final data = await _supabase.from('tugas').select().order('id');
+      final data = await _supabase.from('todos').select().order('id');
       if (!mounted) return;
       setState(() {
         _daftarTugas = data;
@@ -180,7 +180,7 @@ class _P9AutentikasiPageState extends State<P9AutentikasiPage> {
     final pengguna = _pengguna;
     if (judul.isEmpty || pengguna == null) return;
     try {
-      await _supabase.from('tugas').insert({
+      await _supabase.from('todos').insert({
         'judul': judul,
         'user_id': pengguna.id,
       });
@@ -202,7 +202,7 @@ class _P9AutentikasiPageState extends State<P9AutentikasiPage> {
   ) async {
     try {
       await _supabase
-          .from('tugas')
+          .from('todos')
           .update({'selesai': selesai})
           .eq('id', tugas['id']);
       if (!mounted) return;
@@ -234,7 +234,7 @@ class _P9AutentikasiPageState extends State<P9AutentikasiPage> {
     );
     if (yakin != true) return;
     try {
-      await _supabase.from('tugas').delete().eq('id', tugas['id']);
+      await _supabase.from('todos').delete().eq('id', tugas['id']);
       if (!mounted) return;
       _tampilPesan('Tugas dihapus');
       ambilTugas();

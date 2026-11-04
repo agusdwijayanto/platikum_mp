@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 // Konfigurasi Supabase.
 // Ambil dari dashboard Supabase: Settings lalu API.
@@ -24,14 +25,23 @@ class _P8TodoPageState extends State<P8TodoPage> {
 
   final _judulController = TextEditingController();
 
+  // Sesi login dibaca dari supabase_flutter, hanya untuk mengambil
+  // token dan id pengguna yang sedang login (Pertemuan 9). Seluruh
+  // lalu lintas data halaman ini tetap memakai http mentah sesuai
+  // materi Pertemuan 8, bukan SDK.
+  Session? get _sesi => Supabase.instance.client.auth.currentSession;
+  User? get _pengguna => Supabase.instance.client.auth.currentUser;
+
   // Header yang dikirim di semua request:
   // - apikey: kunci publik project Supabase, tanda pengenal aplikasi.
-  // - Authorization: kata Bearer diikuti kunci yang sama, bukti izin akses.
+  // - Authorization: Bearer + token sesi pengguna yang sedang login.
+  //   Token inilah yang dibaca aturan RLS di server, sehingga data
+  //   yang kembali hanya tugas milik pengguna tersebut.
   // - Content-Type: memberi tahu server bahwa isi request berformat JSON.
   Map<String, String> _header() {
     return {
       'apikey': supabaseAnonKey,
-      'Authorization': 'Bearer $supabaseAnonKey',
+      'Authorization': 'Bearer ${_sesi?.accessToken ?? supabaseAnonKey}',
       'Content-Type': 'application/json',
     };
   }
@@ -60,6 +70,13 @@ class _P8TodoPageState extends State<P8TodoPage> {
   // Respons berhasil = status 200, isi body berupa JSON daftar tugas.
   // Respons gagal = status selain 200, pesan error ditampilkan ke pengguna.
   Future<void> ambilTugas() async {
+    if (_pengguna == null) {
+      setState(() {
+        _sedangMuat = false;
+        _pesanError = 'Belum ada sesi login. Silakan login dulu.';
+      });
+      return;
+    }
     setState(() {
       _sedangMuat = true;
       _pesanError = null;
@@ -95,12 +112,12 @@ class _P8TodoPageState extends State<P8TodoPage> {
   // Respons berhasil = status 201 (data baru berhasil dibuat).
   Future<void> tambahTugas() async {
     final judul = _judulController.text.trim();
-    if (judul.isEmpty) return;
+    if (judul.isEmpty || _pengguna == null) return;
     try {
       final response = await http.post(
         Uri.parse(_alamatTodos),
         headers: _header(),
-        body: jsonEncode({'judul': judul}),
+        body: jsonEncode({'judul': judul, 'user_id': _pengguna!.id}),
       );
       if (!mounted) return;
       if (response.statusCode == 201) {
