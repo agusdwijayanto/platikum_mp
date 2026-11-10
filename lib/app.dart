@@ -12,6 +12,7 @@ import 'pages/pertemuan/p5_gesturedetector.dart';
 import 'pages/pertemuan/p6_form_page.dart';
 import 'pages/pertemuan/p8_todo_page.dart';
 import 'pages/pertemuan/p9_autentikasi_page.dart';
+import 'pages/pertemuan/p10_native_sensor_page.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -66,6 +67,7 @@ class MyApp extends StatelessWidget {
         '/p6': (_) => const P6_FormPage(),
         '/p8': (_) => const P8TodoPage(),
         '/p9': (_) => const P9AutentikasiPage(),
+        '/p10': (_) => const P10NativeSensorPage(),
       },
     );
   }

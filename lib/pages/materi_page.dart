@@ -64,6 +64,13 @@ class MateriPage extends StatelessWidget {
           subtitle: 'Autentikasi dan Manajemen Sesi',
           route: '/p9',
         ),
+        _materiCard(
+          context,
+          icon: Icons.phone_android,
+          title: 'Pertemuan 10',
+          subtitle: 'Native dan Sensor',
+          route: '/p10',
+        ),
       ],
     );
   }
