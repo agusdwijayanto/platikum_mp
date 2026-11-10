@@ -51,7 +51,7 @@ flutter {
 }
 
 dependencies {
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
     // Workaround isu desugaring Flutter di Android 12L ke atas (kelas
     // plugin notifikasi gagal dimuat tanpa dua library ini).
     implementation("androidx.window:window:1.0.0")
