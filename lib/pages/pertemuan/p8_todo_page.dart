@@ -1,12 +1,6 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:supabase_flutter/supabase_flutter.dart';
-
-// URL dan kunci publishable project Supabase (flutterlab).
-const String supabaseUrl = 'https://abateiobysegtdgklnwi.supabase.co';
-const String supabaseAnonKey = 'sb_publishable_cuTjsQsW3gihnDZJOD_FzA_nN253Ezc';
+import '../../models/todo_model.dart';
+import '../../viewmodels/todo_viewmodel.dart';
 
 class P8TodoPage extends StatefulWidget {
   const P8TodoPage({super.key});
@@ -16,142 +10,68 @@ class P8TodoPage extends StatefulWidget {
 }
 
 class _P8TodoPageState extends State<P8TodoPage> {
-  List<dynamic> _daftarTugas = [];
-  bool _sedangMuat = true;
-  String? _pesanError;
-
-  final _judulController = TextEditingController();
-
-  Session? get _sesi => Supabase.instance.client.auth.currentSession;
-  User? get _pengguna => Supabase.instance.client.auth.currentUser;
-
-  // Data tetap diambil dengan http mentah; SDK hanya dipinjam
-  // sesinya. Authorization memakai token sesi, bukan kunci
-  // publishable, supaya RLS hanya mengembalikan tugas milik
-  // pengguna yang sedang login.
-  Map<String, String> _header() {
-    return {
-      'apikey': supabaseAnonKey,
-      'Authorization': 'Bearer ${_sesi?.accessToken ?? supabaseAnonKey}',
-      'Content-Type': 'application/json',
-    };
-  }
-
-  String get _alamatTodos => '$supabaseUrl/rest/v1/todos';
+  late final TodoViewModel _viewModel;
 
   @override
   void initState() {
     super.initState();
-    ambilTugas();
+    _viewModel = TodoViewModel();
+    _viewModel.ambilTugas();
   }
 
   @override
   void dispose() {
-    _judulController.dispose();
+    _viewModel.dispose();
     super.dispose();
   }
 
   void _tampilPesan(String pesan) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(pesan)));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(pesan)),
+    );
   }
 
-  Future<void> ambilTugas() async {
-    if (_pengguna == null) {
-      setState(() {
-        _sedangMuat = false;
-        _pesanError = 'Belum ada sesi login. Silakan login dulu.';
-      });
-      return;
-    }
-    setState(() {
-      _sedangMuat = true;
-      _pesanError = null;
-    });
-    try {
-      final response = await http.get(
-        Uri.parse('$_alamatTodos?select=*&order=id.asc'),
-        headers: _header(),
-      );
-      if (!mounted) return;
-      if (response.statusCode == 200) {
-        setState(() {
-          _daftarTugas = jsonDecode(response.body) as List<dynamic>;
-          _sedangMuat = false;
-        });
-      } else {
-        setState(() {
-          _pesanError =
-              'Gagal mengambil data (${response.statusCode}): ${response.body}';
-          _sedangMuat = false;
-        });
-      }
-    } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _pesanError = 'Tidak bisa terhubung ke server: $e';
-        _sedangMuat = false;
-      });
-    }
+  void _dialogTambahTugas() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Tambah Tugas'),
+        content: TextField(
+          controller: _viewModel.judulController,
+          decoration: const InputDecoration(
+            labelText: 'Judul tugas',
+            border: OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Batal'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final sukses = await _viewModel.tambahTugas();
+              if (!mounted) return;
+              Navigator.pop(context);
+              if (sukses) {
+                _tampilPesan('Tugas ditambahkan');
+              } else {
+                _tampilPesan('Gagal menambah tugas');
+              }
+            },
+            child: const Text('Tambah'),
+          ),
+        ],
+      ),
+    );
   }
 
-  Future<void> tambahTugas() async {
-    final judul = _judulController.text.trim();
-    if (judul.isEmpty || _pengguna == null) return;
-    try {
-      final response = await http.post(
-        Uri.parse(_alamatTodos),
-        headers: _header(),
-        body: jsonEncode({'judul': judul, 'user_id': _pengguna!.id}),
-      );
-      if (!mounted) return;
-      if (response.statusCode == 201) {
-        _judulController.clear();
-        Navigator.pop(context);
-        _tampilPesan('Tugas ditambahkan');
-        ambilTugas();
-      } else {
-        _tampilPesan(
-          'Gagal menambah tugas (${response.statusCode}): ${response.body}',
-        );
-      }
-    } catch (e) {
-      if (!mounted) return;
-      _tampilPesan('Tidak bisa terhubung ke server: $e');
-    }
-  }
-
-  Future<void> ubahStatusTugas(
-    Map<String, dynamic> tugas,
-    bool selesai,
-  ) async {
-    try {
-      final response = await http.patch(
-        Uri.parse('$_alamatTodos?id=eq.${tugas['id']}'),
-        headers: _header(),
-        body: jsonEncode({'selesai': selesai}),
-      );
-      if (!mounted) return;
-      if (response.statusCode == 200 || response.statusCode == 204) {
-        ambilTugas();
-      } else {
-        _tampilPesan(
-          'Gagal mengubah tugas (${response.statusCode}): ${response.body}',
-        );
-      }
-    } catch (e) {
-      if (!mounted) return;
-      _tampilPesan('Tidak bisa terhubung ke server: $e');
-    }
-  }
-
-  Future<void> hapusTugas(Map<String, dynamic> tugas) async {
+  Future<void> _konfirmasiHapus(Todo tugas) async {
     final yakin = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Hapus Tugas'),
-        content: Text('Hapus tugas "${tugas['judul']}"?'),
+        content: Text('Hapus tugas "${tugas.judul}"?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -165,78 +85,49 @@ class _P8TodoPageState extends State<P8TodoPage> {
       ),
     );
     if (yakin != true) return;
-    try {
-      final response = await http.delete(
-        Uri.parse('$_alamatTodos?id=eq.${tugas['id']}'),
-        headers: _header(),
-      );
-      if (!mounted) return;
-      if (response.statusCode == 200 || response.statusCode == 204) {
-        _tampilPesan('Tugas dihapus');
-        ambilTugas();
-      } else {
-        _tampilPesan(
-          'Gagal menghapus tugas (${response.statusCode}): ${response.body}',
-        );
-      }
-    } catch (e) {
-      if (!mounted) return;
-      _tampilPesan('Tidak bisa terhubung ke server: $e');
+    final sukses = await _viewModel.hapusTugas(tugas);
+    if (!mounted) return;
+    if (sukses) {
+      _tampilPesan('Tugas dihapus');
+    } else {
+      _tampilPesan('Gagal menghapus tugas');
     }
-  }
-
-  void _dialogTambahTugas() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Tambah Tugas'),
-        content: TextField(
-          controller: _judulController,
-          decoration: const InputDecoration(
-            labelText: 'Judul tugas',
-            border: OutlineInputBorder(),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Batal'),
-          ),
-          ElevatedButton(onPressed: tambahTugas, child: const Text('Tambah')),
-        ],
-      ),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Pertemuan 8 - To-Do List API'),
-      ),
-      body: _isiBody(),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _dialogTambahTugas,
-        child: const Icon(Icons.add),
-      ),
+    return ListenableBuilder(
+      listenable: _viewModel,
+      builder: (context, _) {
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Pertemuan 8 - To-Do List API'),
+          ),
+          body: _isiBody(),
+          floatingActionButton: FloatingActionButton(
+            onPressed: _dialogTambahTugas,
+            child: const Icon(Icons.add),
+          ),
+        );
+      },
     );
   }
 
   Widget _isiBody() {
-    if (_sedangMuat) {
+    if (_viewModel.sedangMuat) {
       return const Center(child: CircularProgressIndicator());
     }
-    if (_pesanError != null) {
+    if (_viewModel.pesanError != null) {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(_pesanError!, textAlign: TextAlign.center),
+              Text(_viewModel.pesanError!, textAlign: TextAlign.center),
               const SizedBox(height: 12),
               ElevatedButton(
-                onPressed: ambilTugas,
+                onPressed: () => _viewModel.ambilTugas(),
                 child: const Text('Coba Lagi'),
               ),
             ],
@@ -244,32 +135,31 @@ class _P8TodoPageState extends State<P8TodoPage> {
         ),
       );
     }
-    if (_daftarTugas.isEmpty) {
+    if (_viewModel.daftarTugas.isEmpty) {
       return const Center(child: Text('Belum ada tugas'));
     }
     return RefreshIndicator(
-      onRefresh: ambilTugas,
+      onRefresh: () => _viewModel.ambilTugas(),
       child: ListView.builder(
-        itemCount: _daftarTugas.length,
+        itemCount: _viewModel.daftarTugas.length,
         itemBuilder: (context, index) {
-          final tugas = _daftarTugas[index] as Map<String, dynamic>;
-          final selesai = tugas['selesai'] == true;
+          final tugas = _viewModel.daftarTugas[index];
           return Card(
             margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             child: ListTile(
               leading: Checkbox(
-                value: selesai,
-                onChanged: (value) => ubahStatusTugas(tugas, value ?? false),
+                value: tugas.selesai,
+                onChanged: (value) => _viewModel.ubahStatusTugas(tugas, value ?? false),
               ),
               title: Text(
-                tugas['judul'] ?? '',
+                tugas.judul,
                 style: TextStyle(
-                  decoration: selesai ? TextDecoration.lineThrough : null,
+                  decoration: tugas.selesai ? TextDecoration.lineThrough : null,
                 ),
               ),
               trailing: IconButton(
                 icon: const Icon(Icons.delete, color: Colors.red),
-                onPressed: () => hapusTugas(tugas),
+                onPressed: () => _konfirmasiHapus(tugas),
               ),
             ),
           );
