@@ -4,28 +4,27 @@ Nama: Agus Dwijayanto
 NIM: 241011750001
 Kelas: 04SIFE002
 
-## 1. Bagaimana cara menerapkan arsitektur MVVM pada aplikasi yang dibuat
+## 1. Cara menerapkan MVVM
 
-Pada pertemuan ini saya menerapkan arsitektur MVVM pada fitur To-Do List
-(Pertemuan 8) dengan memisahkan kode menjadi tiga lapis:
+Di pertemuan ini saya menerapkan MVVM di fitur To-Do List (Pertemuan 8).
+Kodenya saya pisah jadi tiga bagian:
 
-- **Model** (`lib/models/todo_model.dart`): kelas `Todo` menyimpan struktur
-  data (id, judul, selesai, user_id) dengan `fromJson` dan `toJson`.
-- **ViewModel** (`lib/viewmodels/todo_viewmodel.dart`): kelas `TodoViewModel`
-  extends `ChangeNotifier`, menyimpan state (daftarTugas, sedangMuat,
-  pesanError) dan logika CRUD (muatTugas, tambahTugas, ubahStatusTugas,
-  hapusTugas). Pemanggilan Supabase memakai header apikey dan Authorization
-  Bearer token sesi serta user_id.
-- **View** (`lib/pages/pertemuan/p8_todo_page.dart`): `P8TodoPage` hanya
-  menampilkan UI dan meneruskan aksi pengguna ke ViewModel, mendengarkan
-  perubahan lewat `ListenableBuilder`. Route `/p8` dan kartu Materi tidak
-  diubah.
+- Model (`lib/models/todo_model.dart`): isinya data Todo, yaitu id, judul,
+  selesai, dan user_id. Ada `fromJson` dan `toJson`.
+- ViewModel (`lib/viewmodels/todo_viewmodel.dart`): isinya state dan logika.
+  State-nya daftar tugas, sedang memuat, dan pesan error. Logikanya muat
+  tugas, tambah tugas, ubah status, dan hapus tugas. Buat ambil data dari
+  Supabase saya pakai header apikey dan token Bearer dari sesi login, plus
+  user_id.
+- View (`lib/pages/pertemuan/p8_todo_page.dart`): isinya tampilan saja. Kalau
+  pengguna menekan tombol, View teruskan ke ViewModel. Kalau ada perubahan,
+  View ikut berubah karena mendengarkan ViewModel lewat `ListenableBuilder`.
+  Route `/p8` dan kartu Materi tidak saya ubah.
 
-Alur datanya: View memanggil ViewModel, ViewModel memanggil Supabase,
-hasilnya disimpan di state ViewModel, lalu View ikut berubah lewat
-`notifyListeners`. Tidak ada package baru yang ditambahkan.
+Cara kerjanya: View minta data ke ViewModel, ViewModel ambil data dari
+Supabase, terus View ikut berubah. Saya tidak menambah package baru.
 
-## 2. Contoh implementasi langsung
+## 2. Contoh implementasi
 
 Model:
 
@@ -102,14 +101,15 @@ class _P8TodoPageState extends State<P8TodoPage> {
 
 ## 3. Hasil
 
-Halaman To-Do berjalan sesudah refactor, tugas tampil dan tombol tambah,
-centang, hapus berfungsi.
+Sesudah di-refactor, halaman To-Do tetap jalan seperti biasa. Tugas tampil,
+tombol tambah, centang, dan hapus berfungsi.
 
 ![Halaman To-Do sesudah refactor](hasil-todo-di-hp.jpg)
 
-Struktur file tiga lapis (models, viewmodels, halaman P8):
+Ini struktur file-nya, sudah kepisah jadi tiga bagian (models, viewmodels,
+halaman P8):
 
 ![Struktur file tiga lapis](struktur-file-mvvm.png)
 
-Pengujian di HP Poco F6: login, tambah, centang, hapus, logout, dan dua akun
-tetap hanya melihat tugas masing-masing, sama seperti sebelum refactor.
+Saya tes di HP Poco F6: login, tambah, centang, hapus, dan logout jalan. Dua
+akun tetap hanya melihat tugas masing-masing, sama seperti sebelum di-refactor.
