@@ -71,6 +71,13 @@ class MateriPage extends StatelessWidget {
           subtitle: 'Native dan Sensor',
           route: '/p10',
         ),
+        _materiCard(
+          context,
+          icon: Icons.search,
+          title: 'Pertemuan 12',
+          subtitle: 'Search View dan Option Menu',
+          route: '/p12',
+        ),
       ],
     );
   }
