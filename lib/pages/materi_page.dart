@@ -73,6 +73,13 @@ class MateriPage extends StatelessWidget {
         ),
         _materiCard(
           context,
+          icon: Icons.architecture,
+          title: 'Pertemuan 11',
+          subtitle: 'Arsitektur MVVM',
+          route: '/p8',
+        ),
+        _materiCard(
+          context,
           icon: Icons.search,
           title: 'Pertemuan 12',
           subtitle: 'Search View dan Option Menu',
