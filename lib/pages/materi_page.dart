@@ -76,7 +76,7 @@ class MateriPage extends StatelessWidget {
           icon: Icons.architecture,
           title: 'Pertemuan 11',
           subtitle: 'Arsitektur MVVM',
-          route: '/p8',
+          route: '/p11',
         ),
         _materiCard(
           context,
